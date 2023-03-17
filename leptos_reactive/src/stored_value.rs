@@ -73,8 +73,7 @@ impl<T> StoredValue<T> {
         self.get_value()
     }
 
-    /// Returns a clone of the signals current value, subscribing the effect
-    /// to this signal.
+    /// Returns a clone of the current stored value.
     ///
     /// # Panics
     /// Panics if you try to access a value stored in a [Scope] that has been disposed.
@@ -178,8 +177,8 @@ impl<T> StoredValue<T> {
         self.try_with_value(f).expect("could not get stored value")
     }
 
-    /// Same as [`StoredValue::with`] but returns [`Some(O)]` only if
-    /// the signal is still valid. [`None`] otherwise.
+    /// Same as [`StoredValue::with`] but returns [`None]` if
+    /// the value's [Scope] has been disposed. 
     #[deprecated = "Please use `try_with_value` instead, as this method does \
                     not track the stored value. This method will also be \
                     removed in a future version of `leptos`"]
@@ -188,7 +187,7 @@ impl<T> StoredValue<T> {
     }
 
     /// Same as [`StoredValue::with`] but returns [`Some(O)]` only if
-    /// the signal is still valid. [`None`] otherwise.
+    /// the stored value's scope has not been disposed. [`None`] otherwise.
     pub fn try_with_value<O>(&self, f: impl FnOnce(&T) -> O) -> Option<O> {
         with_runtime(self.runtime, |runtime| {
             let values = runtime.stored_values.borrow();
@@ -296,7 +295,7 @@ impl<T> StoredValue<T> {
     }
 
     /// Same as [`Self::update`], but returns [`Some(O)`] if the
-    /// signal is still valid, [`None`] otherwise.
+    /// stored value's scope has not been disposed, [`None`] otherwise.
     pub fn try_update_value<O>(self, f: impl FnOnce(&mut T) -> O) -> Option<O> {
         with_runtime(self.runtime, |runtime| {
             let values = runtime.stored_values.borrow();
